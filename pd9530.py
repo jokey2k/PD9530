@@ -7,6 +7,7 @@
     To get a demo, just run "python pd9530.py COM6"
 
     :copyright: 02.2016 by Markus Ullmann, mail@markus-ullmann.de
+    :license: BSD-3
 """
 
 __version__ = "1.0.0"
