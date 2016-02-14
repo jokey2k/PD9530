@@ -1,13 +1,9 @@
 from setuptools import setup
 
-def readme():
-    with open('README.md') as f:
-        return f.read()
-
 setup(
     name="pd9530",
     py_modules=["pd9530"],
-    version="1.0.0",
+    version="1.0.2",
     description="Library to interact with a PD9530 handheld scanner",
     author="Markus Ullmann",
     author_email="mail@markus-ullmann.de",
@@ -17,6 +13,9 @@ setup(
     install_requires=[
        'pyserial'
     ],
+    extras_require = {
+        'sendkeys':  ["pywin32"]
+    },
     platform="any",
     zip_safe=False,
     include_package_data=True,
@@ -49,5 +48,11 @@ setup(
         "Topic :: Terminals :: Serial",
         "Topic :: Utilities",
     ],
-    long_description=readme(),
+    long_description="""Library to use Datalogic(r) PowerScan(r) PD-9530 with USB-COM or RS232 on Windows(r) and UNIXes
+
+The package depends on pySerial for communication and pywin32 for sending keystrokes.
+
+PowerScan and DataLogic are registered trademarks of Datalogic ADC. in many countries, including the U.S.A. and the E.U.
+Windows is a registered trademark by Microsoft Corporation
+""",
 )
