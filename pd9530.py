@@ -255,6 +255,7 @@ def endless_code_scanning(com_port, echo):
     print("OK, port open. Connected device:")
     print(scanner.get_device_id())
     print("-"*70)
+    print("Now scanning codes and sending them as keystrokes")
     print("Press CTRL-C to exit")
 
     import win32com.client as comclt
@@ -331,7 +332,7 @@ def feature_demo(com_port):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("com_port")
+    parser.add_argument("com_port", help="COM port to use, set it to 115200 8N1")
     parser.add_argument("--endless", action="store_true", help="just endlessly scans codes and sends them as keystrokes")
     parser.add_argument("--echo", action="store_true", help="logs codes to terminal")
     parser.add_argument("--debug", action="store_true", help="reconfigures logging to show debug level")
