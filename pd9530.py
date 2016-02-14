@@ -1,24 +1,24 @@
 """
     pd9530
     ~~~~~~
-
     Library to interact with a PD9530 handheld scanner
-
     To get a demo, just run "python pd9530.py COM6"
-
     :copyright: 02.2016 by Markus Ullmann, mail@markus-ullmann.de
     :license: BSD-3
 """
 
-__version__ = "1.0.3"
-
+# python imports
 import array
 import io
 import logging
 import sys
 import time
 
+# environment imports
 import serial
+
+# constants
+__version__ = "1.0.3"
 
 serial_logger = logging.getLogger('serialComm')
 
@@ -31,19 +31,20 @@ CMD_MODE_PICTURE_JPEG = 1
 CMD_MODE_PICTURE_JPEG2000 = 2
 CMD_MODE_PICTURE_TIFF = 3
 
+
 class PD9530(object):
     """Interface to interact with Datalogic PD9530 in USB-COM or RS232 mode"""
 
     def __init__(self, com_port="COM1", baudrate=115200):
         super(PD9530, self).__init__()
         self.serial = serial.serial_for_url(
-                com_port,
-                baudrate,
-                parity="N",
-                rtscts=False,
-                xonxoff=False,
-                timeout=0,
-                do_not_open=True)
+            com_port,
+            baudrate,
+            parity="N",
+            rtscts=False,
+            xonxoff=False,
+            timeout=0,
+            do_not_open=True)
         self.sio = None
         self.unhandled_messages = []
         self.model = "Unknown"
@@ -54,14 +55,14 @@ class PD9530(object):
     def attach(self):
         """Attaches to scanner"""
 
-        for i in range(self.timeout*5):
+        for _ in range(self.timeout * 5):
             try:
                 if not self.serial.isOpen():
                     self.serial.open()
                 serial_logger.debug("Port open!")
                 break
-            except serial.SerialException as e:
-                if "31" in str(e):
+            except serial.SerialException as ex:
+                if "31" in str(ex):
                     serial_logger.debug("Scanner not active yet")
                     time.sleep(0.2)
                 else:
@@ -86,14 +87,13 @@ class PD9530(object):
             self.attach()
 
         cmd += '\r'
-        serial_logger.debug("sending command: %s" % cmd)
+        serial_logger.debug("sending command: %s", cmd)
         self.sio.write(cmd.encode('utf-8'))
         self.sio.flush()
 
     def read_non_blocking(self):
         """Performs a non-blocking read call on serial"""
 
-        line = []
         lines = []
 
         if self.serial.in_waiting > 0:
@@ -102,7 +102,7 @@ class PD9530(object):
                 self.pending_line.append(byte)
                 if byte == 13:
                     finalized_line = array.array("B", self.pending_line).tostring().decode("utf-8")
-                    serial_logger.debug("Completed line: %s" % finalized_line)
+                    serial_logger.debug("Completed line: %s", finalized_line)
                     lines.append(finalized_line)
                     self.pending_line = []
 
@@ -113,8 +113,7 @@ class PD9530(object):
 
         lines = []
 
-        for i in range(timeout*10):
-            done = False
+        for _ in range(timeout * 10):
             read_lines = self.read_non_blocking()
             if read_lines:
                 lines.extend(read_lines)
@@ -212,10 +211,10 @@ class PD9530(object):
         elif content_type == CMD_MODE_PICTURE_TIFF:
             content_type_name = "TIFF"
         else:
-            serial_logger.warn("Unhandled picture type %s" % content_type)
+            serial_logger.warn("Unhandled picture type %s", content_type)
             content_type_name = "unknown"
 
-        serial_logger.debug("Image ready, length: %i, type: %s" % (content_length, content_type_name))
+        serial_logger.debug("Image ready, length: %i, type: %s", content_length, content_type_name)
         self.set_picture_mode_fetch()
 
         imagedata = []
@@ -244,7 +243,7 @@ def endless_code_scanning(com_port, echo):
 
     scanner = PD9530(com_port)
     print("Please move scanner within %s secs to wake it up, checking on %s" % (scanner.timeout, scanner.serial.port))
-    print("-"*70)
+    print("-" * 70)
 
     try:
         scanner.attach()
@@ -254,7 +253,7 @@ def endless_code_scanning(com_port, echo):
 
     print("OK, port open. Connected device:")
     print(scanner.get_device_id())
-    print("-"*70)
+    print("-" * 70)
     print("Now scanning codes and sending them as keystrokes")
     print("Press CTRL-C to exit")
 
@@ -281,11 +280,11 @@ def endless_code_scanning(com_port, echo):
 
 
 def feature_demo(com_port):
-    print("-"*70)
+    print("-" * 70)
     print("PD9530 Library feature demo")
     print("")
 
-    print("-"*70)
+    print("-" * 70)
     scanner = PD9530(com_port)
 
     print("Please move scanner within %s secs to wake it up, checking on %s" % (scanner.timeout, scanner.serial.port))
@@ -299,7 +298,7 @@ def feature_demo(com_port):
     print("Device is:")
     print(device)
 
-    print("-"*70)
+    print("-" * 70)
     print("Please activate an application we can send keystrokes to and scan something")
 
     import win32com.client as comclt
@@ -312,7 +311,7 @@ def feature_demo(com_port):
             break
     wsh.SendKeys(code)
 
-    print("-"*70)
+    print("-" * 70)
     print("Make photo by pressing trigger")
     image, content_type = scanner.get_picture()
     if image is None:
@@ -324,12 +323,12 @@ def feature_demo(com_port):
                 imagefile.write(byte)
             print("Image is in test.%s" % content_type.lower())
 
-    print("-"*70)
+    print("-" * 70)
     print("Closing sanner port")
     scanner.close()
 
 
-if __name__ == '__main__':
+def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("com_port", help="COM port to use, set it to 115200 8N1")
@@ -337,7 +336,7 @@ if __name__ == '__main__':
     parser.add_argument("--echo", action="store_true", help="logs codes to terminal")
     parser.add_argument("--debug", action="store_true", help="reconfigures logging to show debug level")
 
-    args = parser.parse_args()
+    args = PARSER.parse_args()
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
 
@@ -345,3 +344,7 @@ if __name__ == '__main__':
         endless_code_scanning(args.com_port, args.echo)
     else:
         feature_demo(args.com_port)
+
+
+if __name__ == '__main__':
+    main()
