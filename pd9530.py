@@ -233,7 +233,7 @@ def _flush_input():
         msvcrt.getch()
 
 
-def endless_code_scanning(com_port):
+def endless_code_scanning(com_port, echo):
     """Use this as stub if you just want to use the scanner to send keys"""
 
     print("Waiting for scanner, please move it to wake it up")
@@ -253,6 +253,8 @@ def endless_code_scanning(com_port):
             lines = scanner.readlines()
             for line in lines:
                 for char in line:
+                    if echo:
+                        print("Received code: %s" % char)
                     serial_logger.info("Received code: %s" % char)
                     if char == '{':
                         char = char.replace("{", "{{}")
@@ -314,6 +316,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("com_port")
     parser.add_argument("--endless", action="store_true", help="just endlessly scans codes and sends them as keystrokes")
+    parser.add_argument("--echo", action="store_true", help="logs codes to terminal")
     parser.add_argument("--debug", action="store_true", help="reconfigures logging to show debug level")
 
     args = parser.parse_args()
@@ -321,6 +324,6 @@ if __name__ == '__main__':
         logging.basicConfig(level=logging.DEBUG)
 
     if args.endless:
-        endless_code_scanning(args.com_port)
+        endless_code_scanning(args.com_port, args.echo)
     else:
         feature_demo(args.com_port)
