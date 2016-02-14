@@ -15,6 +15,7 @@ __version__ = "1.0.2"
 import array
 import io
 import logging
+import sys
 import time
 
 import serial
@@ -55,7 +56,8 @@ class PD9530(object):
 
         for i in range(self.timeout*5):
             try:
-                self.serial.open()
+                if not self.serial.isOpen():
+                    self.serial.open()
                 serial_logger.debug("Port open!")
                 break
             except serial.SerialException as e:
@@ -64,6 +66,10 @@ class PD9530(object):
                     time.sleep(0.2)
                 else:
                     raise
+
+        # Go for it once again, possibly explode to pass it along
+        if not self.serial.isOpen():
+            self.serial.open()
 
         self.sio = io.BufferedRWPair(self.serial, self.serial)
 
@@ -236,14 +242,19 @@ def _flush_input():
 def endless_code_scanning(com_port, echo):
     """Use this as stub if you just want to use the scanner to send keys"""
 
-    print("Waiting for scanner, please move it to wake it up")
-    print("-"*40)
     scanner = PD9530(com_port)
-    scanner.attach()
+    print("Please move scanner within %s secs to wake it up, checking on %s" % (scanner.timeout, scanner.serial.port))
+    print("-"*70)
+
+    try:
+        scanner.attach()
+    except serial.SerialException:
+        print("Did not detect scanner. Wrong port?")
+        sys.exit(1)
 
     print("OK, port open. Connected device:")
     print(scanner.get_device_id())
-    print("-"*40)
+    print("-"*70)
     print("Press CTRL-C to exit")
 
     import win32com.client as comclt
@@ -269,19 +280,25 @@ def endless_code_scanning(com_port, echo):
 
 
 def feature_demo(com_port):
-    print("-"*40)
+    print("-"*70)
     print("PD9530 Library feature demo")
     print("")
 
-    print("-"*40)
-    print("Waiting for scanner, please move it to wake it up")
+    print("-"*70)
     scanner = PD9530(com_port)
-    scanner.attach()
+
+    print("Please move scanner within %s secs to wake it up, checking on %s" % (scanner.timeout, scanner.serial.port))
+    try:
+        scanner.attach()
+    except serial.SerialException:
+        print("Did not detect scanner. Wrong port?")
+        sys.exit(1)
+
     device = scanner.get_device_id()
     print("Device is:")
     print(device)
 
-    print("-"*40)
+    print("-"*70)
     print("Please activate an application we can send keystrokes to and scan something")
 
     import win32com.client as comclt
@@ -294,7 +311,7 @@ def feature_demo(com_port):
             break
     wsh.SendKeys(code)
 
-    print("-"*40)
+    print("-"*70)
     print("Make photo by pressing trigger")
     image, content_type = scanner.get_picture()
     if image is None:
@@ -306,7 +323,7 @@ def feature_demo(com_port):
                 imagefile.write(byte)
             print("Image is in test.%s" % content_type.lower())
 
-    print("-"*40)
+    print("-"*70)
     print("Closing sanner port")
     scanner.close()
 
