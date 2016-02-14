@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name="pd9530",
     py_modules=["pd9530"],
-    version="1.0.2",
+    version="1.0.3",
     description="Library to interact with a PD9530 handheld scanner",
     author="Markus Ullmann",
     author_email="mail@markus-ullmann.de",
