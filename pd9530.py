@@ -252,8 +252,13 @@ def endless_code_scanning(com_port):
         try:
             lines = scanner.readlines()
             for line in lines:
-                serial_logger.info("Received code: %s" % line)
-                wsh.SendKeys(line)
+                for char in line:
+                    serial_logger.info("Received code: %s" % char)
+                    if char == '{':
+                        char = char.replace("{", "{{}")
+                    elif char == '}':
+                        char = char.replace("}", "{}}")
+                    wsh.SendKeys(char)
         except KeyboardInterrupt:
             break
 
