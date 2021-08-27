@@ -101,7 +101,7 @@ class PD9530(object):
             for byte in buf:
                 self.pending_line.append(byte)
                 if byte == 13:
-                    finalized_line = array.array("B", self.pending_line).tostring().decode("utf-8")
+                    finalized_line = array.array("B", self.pending_line).tobytes().decode("utf-8")
                     serial_logger.debug("Completed line: %s", finalized_line)
                     lines.append(finalized_line)
                     self.pending_line = []
